@@ -1,6 +1,6 @@
 # connect-riak
 
-Connect Riak Session Store backed by [riak-js](https://github.com/frank06/riak-js).
+Riak Session Store for Connect backed by [riak-js](https://github.com/frank06/riak-js).
 
 ### Installation
 

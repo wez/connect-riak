@@ -4,7 +4,7 @@ var express = require('express'),
 var app = express.createServer();
 
 app.use(express.cookieParser());
-app.use(express.session({ secret: "keyboard cat", store: new RiakStore({ reapInterval: 2 * 1000 }) }));
+app.use(express.session({ secret: "s3cr3t", store: new RiakStore({ reapInterval: 2 * 1000 }) }));
 
 // visit /1 to set a value on the session
 app.get('/1', function(req, res) {

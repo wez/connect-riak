@@ -25,7 +25,7 @@ All `options` will be passed into a new Riak client – unless the `client` is e
 
 ``` js
 var db = require('riak-js').getClient(),
-  store = new RiakStore({ options.client: db });
+  store = new RiakStore({ client: db });
 ```
 
 Other options include:

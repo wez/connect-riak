@@ -32,6 +32,7 @@ module.exports = function(connect) {
     Store.call(this, options);
     this.client = options.client || new riak.getClient(options);
     this.bucket = options.bucket || '_sessions';
+    this.dbOptions = { encodeUri: true, debug: false };
     
     if (options.reapInterval > 0) {
       setInterval(function() {
@@ -90,7 +91,7 @@ module.exports = function(connect) {
    */
 
   RiakStore.prototype.get = function(sid, callback) {
-    this.client.get(this.bucket, sid, { encodeUri: true }, function(err, data, meta) {
+    this.client.get(this.bucket, sid, this.dbOptions, function(err, data, meta) {
       if (err && err.notFound) return callback();
       if (err) return callback(err);
       callback(null, data);
@@ -107,7 +108,7 @@ module.exports = function(connect) {
    */
 
   RiakStore.prototype.set = function(sid, session, callback) {    
-    this.client.save(this.bucket, sid, session, { encodeUri: true }, callback);
+    this.client.save(this.bucket, sid, session, this.dbOptions, callback);
   };
 
   /**
@@ -118,7 +119,7 @@ module.exports = function(connect) {
    */
 
   RiakStore.prototype.destroy = function(sid, callback) {
-    this.client.remove(this.bucket, sid, { encodeUri: true }, callback);
+    this.client.remove(this.bucket, sid, this.dbOptions, callback);
   };
 
   /**

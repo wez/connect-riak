@@ -49,22 +49,16 @@ module.exports = function(connect) {
    * @api public
    */
   function reapSessions(self) {
-    
+    var now = new Date();
     self.client
-      .add(self.bucket)
+      .add({
+        bucket: self.bucket,
+        index: "expire_bin",
+        start: "1977-08-01T00:00:00.000Z",
+        end: now.toJSON()
+      })
       .map(function(v) {
-        
-        var data = Riak.mapValuesJson(v)[0];
-        
-        // lame spidermonkey can't parse ISO8601 dates
-        var d = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(data.cookie.expires);
-        if (d) d = new Date(Date.UTC(+d[1], +d[2] - 1, +d[3], +d[4], +d[5], +d[6]));
-        
-        if (+d - +new Date() <= 0) {
-          return [v.key];
-        } else {
-          return [];
-        }
+        return [v.key];
       })
       .reduce('Riak.filterNotFound')
       .run(function(err, expired) {
@@ -108,7 +102,18 @@ module.exports = function(connect) {
    */
 
   RiakStore.prototype.set = function(sid, session, callback) {    
-    this.client.save(this.bucket, sid, session, this.dbOptions, callback);
+    var opt = {
+    };
+    for (var k in this.dbOptions) {
+      opt[k] = this.dbOptions[k];
+    }
+    var d = new Date(session.cookie._expires);
+    if (d) {
+      opt.headers = {};
+      opt.headers['X-Riak-index-expire_bin'] = d.toJSON();
+    }
+
+    this.client.save(this.bucket, sid, session, opt, callback);
   };
 
   /**
@@ -127,11 +132,12 @@ module.exports = function(connect) {
    *
    * @param {Function} callback
    * @api public
-   */
 
+   This is very expensive in riak, so we disable it
   RiakStore.prototype.length = function(callback) {
     this.client.count(this.bucket, callback);
   };
+   */
 
   return RiakStore;
 };

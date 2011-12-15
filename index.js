@@ -34,7 +34,7 @@ module.exports = function(connect) {
     this.bucket = options.bucket || '_sessions';
     this.dbOptions = { encodeUri: true, debug: false };
     
-    if (options.reapInterval > 0) {
+    if (require('cluster').isMaster && options.reapInterval > 0) {
       setInterval(function() {
         reapSessions(this);
       }.bind(this), options.reapInterval);
@@ -64,7 +64,7 @@ module.exports = function(connect) {
       .run(function(err, expired) {
         if (!err && expired && expired.unshift) {
           expired.forEach(function(e) {
-            self.client.remove(self.bucket, e);
+            self.client.remove(self.bucket, e, self.dbOptions);
           });
         }
       });
